@@ -1,15 +1,19 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 
-
 class Device:
-	def __init__(self):
-		self.device_name = None
+	def __init__(self,
+		device_name,
+		device_file,
+		device_size,
+		device_location,
+		device_length):
+		self.device_name = device_name
 		#self.image_file = None
-		self.device_file = None
-		self.device_size = (0, 0)
-		self.device_location = (0, 0)
-		self.pixels_per_micrometer = 0
+		self.device_file = device_file
+		self.device_size = device_size
+		self.device_location = device_location
+		self.pixels_per_micrometer = device_length
 		
 class Chip:
 	def __init__(self):
@@ -59,6 +63,36 @@ class ReticleWindow:
 	def __init__(self, parent_window):
 		self.window = None
 		self.parent_window = parent_window
+		self.device_list = []
+		
+	def add_device(self, event):
+		if self.validate_device():
+			self.device_list.append(self.parse_device())
+			
+	def remove_device(self, event):
+		pass			
+			
+	def parse_device(self):
+		device_name = self.entry_device_name.get()
+		device_file = self.entry_device_file.get()
+		device_size = [float(temporary.strip(',')) for temporary in self.entry_device_size.get().strip('()').split()]
+		device_location = [float(temporary.strip(',')) for temporary in self.entry_device_location.get().strip('()').split()]
+		pixels_per_micrometer = float(self.entry_device_length.get())
+			
+		return Device(device_name=device_name,
+			device_file=device_file,
+			device_size=device_size,
+			device_location=device_location,
+			device_length=pixels_per_micrometer)
+			
+	def update_listbox(self):
+		pass
+		
+	def update_device_info(self):
+		pass
+			
+	def validate_device(self):
+		return True
 		
 	def run(self):
 		self.window = tk.Toplevel(self.parent_window)
@@ -96,6 +130,11 @@ class ReticleWindow:
 		self.list_devices = tk.Listbox(master=self.panel_center_top)
 		self.text_device_info = tk.Text(master=self.panel_center_bottom, width=24)
 		
+		# Bind widgets
+		
+		self.button_add.bind("<Button-1>", self.add_device)
+		self.button_remove.bind("<Button-1>", self.remove_device)
+		
 		# Position widgets
 		
 		self.panel_left.grid(row=0, column=0)
@@ -116,16 +155,16 @@ class ReticleWindow:
 		self.entry_device_size.grid(row=2, column=1)
 		self.label_device_location.grid(row=3, column=0)
 		self.entry_device_location.grid(row=3, column=1)		
-		self.label_device_length.grid(row=4, column=0)
-		self.entry_device_length.grid(row=4, column=1)
+		self.label_device_length.grid(row=4, column=0, columnspan=2)
+		self.entry_device_length.grid(row=5, column=1)
 		
-		self.button_add.grid(row=5, column=0)
-		self.button_remove.grid(row=5, column=1)
+		self.button_add.grid(row=6, column=0)
+		self.button_remove.grid(row=6, column=1)
 		
 		splashscreen = Image.open("NXP_PCF8577C_small.jpg")
 		ss_width = splashscreen.width
 		ss_height = splashscreen.height		
-		desired_height = 500
+		desired_height = 450
 		factor = desired_height / ss_height
 		splashscreen = splashscreen.resize((int(ss_width * factor), int(ss_height * factor)), Image.ANTIALIAS)
 		self.splashscreen = ImageTk.PhotoImage(splashscreen)
